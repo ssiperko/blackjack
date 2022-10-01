@@ -1,14 +1,16 @@
 from shoe import Shoe
+from bank import Bank
 from cards_map import CardMap
 import time
 
 
 class Game:
     DEALER = 'Dealer'
-    PLAYERS = 'Players'
+    PLAYERS = 'Player'
 
     def __init__(self):
         self.shoe = Shoe()
+        self.bank = Bank()
         self.cards = {}
         self.count = 0
         self.hands = {}
@@ -18,7 +20,12 @@ class Game:
         self.shoe.fill_shoe(decks)
         card_map = CardMap()
         self.cards = card_map.get_map()
+        self.bank.construct_bank(players)
         while self.shoe.shoe:
+            for player in range(players):
+                player = 'Player' + str(player + 1)
+                bet = input(player + ', how much would you like to bet?  ')
+                self.bank.place_bets(player, int(bet))
             self.deal_player_hands(players)
             hands = self.hands
 
@@ -134,10 +141,11 @@ class Game:
         winners = []
         dealer = self.hand_values.get(self.DEALER)
         for player, value in self.hand_values.get(self.PLAYERS):
-            if dealer < value <= 21:
+            if dealer <= value <= 21:
                 winners.append(player)
 
         print(winners)
+        self.bank.resolve_bets(winners)
 
     def set_count(self, card):
         if card < 5:
