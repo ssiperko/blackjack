@@ -25,7 +25,10 @@ class Game:
             for player in range(players):
                 player = 'Player' + str(player + 1)
                 bet = input(player + ', how much would you like to bet?  ')
+                if bet == '' or ' ':
+                    continue
                 self.bank.place_bets(player, int(bet))
+
             self.deal_player_hands(players)
             hands = self.hands
 
@@ -100,11 +103,18 @@ class Game:
         print(self.hands.get(player))
 
     def resolve_dealer_hand(self):
+        self.hit(self.DEALER)
         value = self.evaluate_hand(self.hands.get(self.DEALER))
+        if value > 21 or value == -1:
+            self.hand_values[self.DEALER] = -1
+            return
         while value < 17:
             self.hit(self.DEALER)
             value = self.evaluate_hand(self.hands.get(self.DEALER))
-            time.sleep(1)
+            if value > 21 or value == -1:
+                self.hand_values[self.DEALER] = -1
+                return
+            print(self.hands.get(self.DEALER))
         self.hand_values[self.DEALER] = value
         print(self.hands.get(self.DEALER))
 
@@ -139,12 +149,17 @@ class Game:
 
     def get_winners(self):
         winners = []
+        draws = []
         dealer = self.hand_values.get(self.DEALER)
         for player, value in self.hand_values.get(self.PLAYERS):
-            if dealer <= value <= 21:
-                winners.append(player)
+            if value <= 21:
+                if dealer < value:
+                    winners.append(player)
+                elif value == dealer:
+                    draws.append(player)
 
-        print(winners)
+        print(winners, 'winners')
+        print(draws, 'draws')
         self.bank.resolve_bets(winners)
 
     def set_count(self, card):

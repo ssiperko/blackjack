@@ -10,7 +10,7 @@ class Bank:
             for player in range(players):
                 self.bank['Player' + str(player + 1)] = 20000
         except:
-            raise Exception('Error occured while constructing bank')
+            raise Exception('Error occurred while constructing bank')
 
     def place_bets(self, player, bet):
         try:
@@ -20,7 +20,7 @@ class Bank:
                 self.bets[player] = bet
                 self.bank[player] = self.bank.get(player) - bet
             else:
-                return 'Sorry, you dont have enough money to for that bet'
+                return 'Sorry, you do not have enough money to for that bet'
         except:
             raise Exception("Bet could not be placed, please try again")
 
@@ -40,7 +40,6 @@ class Bank:
         self.bank[self.DEALER] = self.bank.get(self.DEALER) + pot
 
         print(self.bank, '  This is the bank')
-        print(self.bets, ' These are the bets')
 
 
         
