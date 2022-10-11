@@ -99,9 +99,11 @@ class Game:
                         self.hit(player)
                         continue
                     if action == '1':
-                        value = self.evaluate_hand(self.hands.get(player))
+                        evaluated_hand = self.evaluate_hand(self.hands.get(player))
+                        value = evaluated_hand[0]
+                        is_blackjack = evaluated_hand[1]
                         if player != self.DEALER:
-                            players_values.append((player, value))
+                            players_values.append((player, value, is_blackjack))
                         self.hand_values[self.PLAYERS] = players_values
                         break
 
@@ -114,14 +116,15 @@ class Game:
         print(self.hands.get(player))
 
     def resolve_dealer_hand(self):
-        self.hit(self.DEALER)
-        value = self.evaluate_hand(self.hands.get(self.DEALER))
+        evaluated_hand = self.evaluate_hand(self.hands.get(self.DEALER))
+        value = evaluated_hand[0]
         if value > 21 or value == -1:
             self.hand_values[self.DEALER] = -1
             return
         while value < 17:
             self.hit(self.DEALER)
-            value = self.evaluate_hand(self.hands.get(self.DEALER))
+            evaluated_hand = self.evaluate_hand(self.hands.get(self.DEALER))
+            value = evaluated_hand[0]
             if value > 21 or value == -1:
                 self.hand_values[self.DEALER] = -1
                 return
@@ -130,6 +133,17 @@ class Game:
         print(self.hands.get(self.DEALER))
 
     def evaluate_hand(self, hand):
+        blackjacks = set()
+        blackjacks.add(('A', 10))
+        blackjacks.add(('A', 'J'))
+        blackjacks.add(('A', 'Q'))
+        blackjacks.add(('A', 'K'))
+
+        if len(hand) == 2:
+            faces = tuple(hand)
+            if faces in blackjacks:
+                return [21, True]
+
         values = set()
         best_hand = -1
 
@@ -156,17 +170,21 @@ class Game:
             else:
                 continue
 
-        return best_hand
+        return [best_hand, False]
 
     def get_winners(self):
+        blackjacks = []
         winners = []
         draws = []
         dealer = self.hand_values.get(self.DEALER)
-        for player, value in self.hand_values.get(self.PLAYERS):
+        for player, value, is_blackjack in self.hand_values.get(self.PLAYERS):
 
             if value > 21 or (dealer == -1 and value == -1):
                 continue
             if value <= 21:
+                if is_blackjack and dealer != 21:
+                    blackjacks.append(player)
+                    continue
                 if dealer < value:
                     winners.append(player)
                 elif value == dealer:
@@ -174,7 +192,8 @@ class Game:
 
         print(winners, 'winners')
         print(draws, 'draws')
-        self.bank.resolve_bets(winners, draws)
+        print(blackjacks, 'blackjacks')
+        self.bank.resolve_bets(winners, draws, blackjacks)
 
     def set_count(self, card):
         if card < 5:

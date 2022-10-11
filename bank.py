@@ -29,12 +29,13 @@ class Bank:
             raise Exception("Bet could not be placed, please try again")
 
     """Calls appropriate handler to distribute funds based on outcome of hand"""
-    def resolve_bets(self, winners, draws):
-        print('hello from resolver', self.bets.items())
+    def resolve_bets(self, winners, draws, blackjacks):
         if winners:
             self.handle_win(winners)
         if draws:
             self.handle_draw(draws)
+        if blackjacks:
+            self.handle_blackjacks(blackjacks)
         self.handle_lose()
         self.bets.clear()
         print(self.bank, '  This is the bank')
@@ -42,7 +43,6 @@ class Bank:
     """Removes winnings from houses bank account, adds it to original bet, deposits the sum in player account and removes bet from bets object"""
     def handle_win(self, winners):
         for winner in winners:
-            print('hello', winner, 'you are a winner')
             if self.bets.get(winner):
                 bet = self.bets.get(winner)
                 self.bank[self.DEALER] = self.bank.get(self.DEALER) - bet
@@ -60,7 +60,13 @@ class Bank:
     def handle_draw(self, draws):
         for draw in draws:
             bet_value = self.bets.get(draw)
-            print(self.bets.items())
-            print('hello', draw, bet_value)
             self.bank[draw] = self.bank.get(draw) + bet_value
             self.bets.pop(draw)
+
+    def handle_blackjacks(self, blackjacks):
+        for bj in blackjacks:
+            bet = self.bets.get(bj)
+            bet_value = int(bet * 2.5)
+            self.bank[bj] = self.bank.get(bj) + bet_value
+            self.bank[self.DEALER] = self.bank.get(self.DEALER) - int(bet * 1.5)
+            self.bets.pop(bj)
