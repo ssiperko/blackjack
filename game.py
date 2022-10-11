@@ -1,5 +1,5 @@
-from shoe import Shoe
 from bank import Bank
+from shoe import Shoe
 from cards_map import CardMap
 import time
 
@@ -8,26 +8,37 @@ class Game:
     DEALER = 'Dealer'
     PLAYERS = 'Player'
 
-    def __init__(self):
-        self.shoe = Shoe()
-        self.bank = Bank()
-        self.cards = {}
+    def __init__(self, shoe: Shoe, bank: Bank, card_map: CardMap):
+        if shoe is None:
+            raise ValueError("shoe must be injected")
+        if bank is None:
+            raise ValueError("bank must be injected")
+        if card_map is None:
+            raise ValueError("card map must be injected")
+        self.shoe = shoe
+        self.bank = bank
+        self.card_map = card_map
+
         self.count = 0
+        self.cards = {}
         self.hands = {}
         self.hand_values = {}
 
     def start_game(self, decks, players):
         self.shoe.fill_shoe(decks)
-        card_map = CardMap()
-        self.cards = card_map.get_map()
+        self.cards = self.card_map.get_map()
         self.bank.construct_bank(players)
         while self.shoe.shoe:
-            for player in range(players):
-                player = 'Player' + str(player + 1)
+            p = 0
+            while p < players:
+                player = 'Player' + str(p + 1)
                 bet = input(player + ', how much would you like to bet?  ')
-                if bet == '' or ' ':
-                    continue
-                self.bank.place_bets(player, int(bet))
+                can_bet = self.bank.place_bets(player, int(bet))
+                if can_bet:
+                    print('nice bet')
+                    p += 1
+                else:
+                    print('Sorry, you dont have enough money')
 
             self.deal_player_hands(players)
             hands = self.hands
@@ -152,6 +163,9 @@ class Game:
         draws = []
         dealer = self.hand_values.get(self.DEALER)
         for player, value in self.hand_values.get(self.PLAYERS):
+
+            if value > 21 or (dealer == -1 and value == -1):
+                continue
             if value <= 21:
                 if dealer < value:
                     winners.append(player)
@@ -160,7 +174,7 @@ class Game:
 
         print(winners, 'winners')
         print(draws, 'draws')
-        self.bank.resolve_bets(winners)
+        self.bank.resolve_bets(winners, draws)
 
     def set_count(self, card):
         if card < 5:
