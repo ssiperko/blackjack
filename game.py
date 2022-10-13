@@ -93,7 +93,7 @@ class Game:
                 self.resolve_dealer_hand()
             else:
                 while True:
-                    action = input(player + ': 0 to hit or 1 to stand  ')
+                    action = input(player + ': 0 to hit, 1 to stand, 2 to double down  ')
                     if action == '0':
                         self.hit(player)
                         continue
@@ -105,6 +105,22 @@ class Game:
                             players_values.append((player, value, is_blackjack))
                         self.hand_values[self.PLAYERS] = players_values
                         break
+                    if action == '2':
+                        evaluated_hand = self.evaluate_hand(self.hands.get(player))
+                        value = evaluated_hand[0]
+                        if value <= 11:
+                            self.bank.double_down(player)
+                            self.hit(player)
+                            evaluated_hand = self.evaluate_hand(self.hands.get(player))
+                            value = evaluated_hand[0]
+                            is_blackjack = evaluated_hand[1]
+                            if player != self.DEALER:
+                                players_values.append((player, value, is_blackjack))
+                            self.hand_values[self.PLAYERS] = players_values
+                            break
+                        else:
+                            print('Sorry, you can only double down if card value is 11 or below.')
+                            continue
 
         self.get_winners()
 

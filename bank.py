@@ -28,6 +28,18 @@ class Bank:
         except:
             raise Exception("Bet could not be placed, please try again")
 
+    def double_down(self, player: str) -> int:
+        try:
+            bet = self.bets.get(player)
+            if self.bank.get(player) >= bet:
+                self.bank[player] = self.bank.get(player) - bet
+                self.bets[player] = self.bets.get(player) + bet
+                return 1
+            else:
+                return 0
+        except:
+            raise Exception("Something went wrong with the double down. Please, try again.")
+
     """Calls appropriate handler to distribute funds based on outcome of hand"""
     def resolve_bets(self, winners: list, draws: list, blackjacks: list) -> None:
         if winners:
