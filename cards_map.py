@@ -1,11 +1,12 @@
-# This class creates a mapping between the numeric card alias and the actual face value of each card
+"""This class creates a mapping between the numeric card alias and the actual face value of each card"""
+
 
 class CardMap:
     def __init__(self):
         self.card_map = {}
         self.card_values = {}
 
-    def get_map(self):
+    def get_map(self) -> dict:
         card_map = self.card_map
         card_map[0] = '2'
         card_map[1] = '3'

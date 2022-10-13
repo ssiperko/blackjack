@@ -8,7 +8,7 @@ class Game:
     DEALER = 'Dealer'
     PLAYERS = 'Player'
 
-    def __init__(self, shoe: Shoe, bank: Bank, card_map: CardMap):
+    def __init__(self, shoe: Shoe, bank: Bank, card_map: CardMap) -> None:
         if shoe is None:
             raise ValueError("shoe must be injected")
         if bank is None:
@@ -24,7 +24,7 @@ class Game:
         self.hands = {}
         self.hand_values = {}
 
-    def start_game(self, decks, players):
+    def start_game(self, decks: int, players: int) -> None:
         self.shoe.fill_shoe(decks)
         self.cards = self.card_map.get_map()
         self.bank.construct_bank(players)
@@ -59,7 +59,7 @@ class Game:
 
         print("Shoe is out of cards. Let's fill it up again")
 
-    def deal_player_hands(self, players):
+    def deal_player_hands(self, players: int) -> dict:
         self.hands.clear()
         hands = self.hands
         r = 2
@@ -83,10 +83,9 @@ class Game:
                     hands[self.DEALER].append(self.cards.get(card))
                 else:
                     hands[self.DEALER] = [self.cards.get(card)]
-
         return hands
 
-    def do_actions(self):
+    def do_actions(self) -> None:
         self.hand_values.clear()
         players_values = []
         for player, hand in self.hands.items():
@@ -109,13 +108,13 @@ class Game:
 
         self.get_winners()
 
-    def hit(self, player):
+    def hit(self, player: str) -> None:
         card = self.shoe.deal_card()
         self.set_count(card)
         self.hands[player].append(self.cards.get(card))
         print(self.hands.get(player))
 
-    def resolve_dealer_hand(self):
+    def resolve_dealer_hand(self) -> None:
         evaluated_hand = self.evaluate_hand(self.hands.get(self.DEALER))
         value = evaluated_hand[0]
         if value > 21 or value == -1:
@@ -132,7 +131,7 @@ class Game:
         self.hand_values[self.DEALER] = value
         print(self.hands.get(self.DEALER))
 
-    def evaluate_hand(self, hand):
+    def evaluate_hand(self, hand: list) -> list:
         blackjacks = set()
         blackjacks.add(('A', 10))
         blackjacks.add(('A', 'J'))
@@ -147,7 +146,10 @@ class Game:
         values = set()
         best_hand = -1
 
-        def get_all_possible_hand_values(i, total):
+        """This method recursively builds all possible combinations of hands.
+        This is necessary because Aces can have two values and we need to find the best hand of
+        the available possibilities"""
+        def get_all_possible_hand_values(i: int, total: int):
             if i >= len(hand):
                 values.add(total)
                 return
@@ -172,7 +174,7 @@ class Game:
 
         return [best_hand, False]
 
-    def get_winners(self):
+    def get_winners(self) -> None:
         blackjacks = []
         winners = []
         draws = []
@@ -195,13 +197,13 @@ class Game:
         print(blackjacks, 'blackjacks')
         self.bank.resolve_bets(winners, draws, blackjacks)
 
-    def set_count(self, card):
+    def set_count(self, card: int) -> None:
         if card < 5:
             self.count += 1
         elif card > 7:
             self.count -= 1
         return
 
-    def get_count(self):
+    def get_count(self) -> int:
         return self.count
 

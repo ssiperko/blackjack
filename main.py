@@ -4,7 +4,7 @@ from bank import Bank
 from cards_map import CardMap
 
 
-def black_jack(decks, players):
+def black_jack(decks: int, players: int):
     shoe = Shoe()
     bank = Bank()
     card_map = CardMap()
